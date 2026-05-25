@@ -11,6 +11,8 @@ modules:
         - nett00n/hyprland
         # solopasha/hyprland for the live-wallpaper stack and nwg-look.
         - solopasha/hyprland
+        # ilyaz/LACT — Linux GPU Control Application (fan curves, clocks, power).
+        - ilyaz/LACT
     install:
       packages:
         - hyprland
@@ -48,5 +50,14 @@ modules:
         - mpvpaper
         - waypaper
         - mpv
+        # --- GPU control ---
+        # LACT exposes fan/clock/power controls via a privileged daemon;
+        # the GUI talks to lactd over a socket.
+        - lact
+
+  - type: systemd
+    system:
+      enabled:
+        - lactd.service
 
   - type: signing
