@@ -8,6 +8,7 @@
   APPS & SESSION
   --------------
     SUPER + RETURN              kitty terminal
+    SUPER + SHIFT + RETURN      kitty in the focused Nautilus folder (else plain kitty)
     SUPER + SPACE               rofi app launcher
     SUPER + E                   nautilus (file manager)
     SUPER + G                   Steam
@@ -68,6 +69,13 @@
     Mute                        toggle default sink mute
     Mic Mute                    toggle default mic mute
     Play / Pause / Next / Prev  playerctl (whichever player is active)
+
+
+  BRIGHTNESS  (external monitors via ddcutil / DDC-CI)
+  ---------------------------------------------------
+    SUPER + =                   brightness up   (hold to repeat)
+    SUPER + -                   brightness down (hold to repeat)
+    Brightness Up / Down keys   same, if the keyboard has them
 
 
   MAINTENANCE
