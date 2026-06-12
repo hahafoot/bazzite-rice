@@ -81,7 +81,7 @@
   MAINTENANCE
   -----------
     SUPER + SHIFT + B           restart waybar (status bar)
-    SUPER + SHIFT + R           reload workspace-watcher.sh (after editing rules)
+    SUPER + SHIFT + R           reload workspace-watcher.lua (after editing rules)
     SUPER + CTRL + SHIFT + R    re-apply hyprland.conf (if monitors/binds drop)
 
 
@@ -126,7 +126,7 @@
       hyprctl reload                           # re-apply hyprland.conf  (primary fix)
       hyprctl dispatch submap reset            # free a stuck submap
       hyprctl keyword monitor "DP-2, ..."      # one-off monitor override
-      ~/.config/hypr/reload-watcher.sh         # restart workspace-watcher
+      ~/.config/hypr/reload-watcher.lua        # restart workspace-watcher
 
     If even your terminal is unreachable, drop to a TTY (Ctrl+Alt+F3),
     log in, and: `hyprctl -i 0 reload`

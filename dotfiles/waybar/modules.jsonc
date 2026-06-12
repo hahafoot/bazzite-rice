@@ -168,7 +168,7 @@
     },
 
     "custom/media": {
-        "exec":            "~/.config/waybar/scripts/media-now.py",
+        "exec":            "~/.config/waybar/scripts/media-now.lua",
         "return-type":     "json",
         "escape":          false,
         "tooltip":         true,
@@ -182,14 +182,14 @@
     "memory": { "format": "  {percentage}%" },
 
     "custom/cpu": {
-        "exec":          "~/.config/waybar/scripts/cpu-stats.sh",
+        "exec":          "~/.config/waybar/scripts/cpu-stats.lua",
         "return-type":   "json",
         "interval":      2,
         "on-click":      "kitty --class=sys-monitor -- btop"
     },
 
     "custom/gpu": {
-        "exec":          "~/.config/waybar/scripts/gpu-stats.sh",
+        "exec":          "~/.config/waybar/scripts/gpu-stats.lua",
         "return-type":   "json",
         "interval":      2,
         "on-click":      "kitty --class=sys-monitor -- btop"

@@ -34,6 +34,10 @@ modules:
         - cliphist
         - kitty
         - zsh
+        # LuaJIT runs the rice's scripting layer (dotfiles/hypr/*.lua,
+        # dotfiles/waybar/scripts/*.lua). Declared explicitly: nothing else
+        # in the image guarantees it.
+        - luajit
         - vulkan-validation-layers
         - jetbrains-mono-fonts
         # --- GUI helpers (auth dialogs, audio/network/bluetooth tray, Qt theming) ---

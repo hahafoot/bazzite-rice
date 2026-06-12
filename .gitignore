@@ -1,5 +1,7 @@
 cosign.key
 *.key
+__pycache__/
+*.pyc
 wallpapers/c8c78924-51dd-4533-8c63-4a30cf9fd0b3_TABLET_LANDSCAPE_LARGE_16_9.webp
 wallpapers/wall.png
 wallpapers/image0.gif
