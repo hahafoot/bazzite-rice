@@ -38,7 +38,7 @@ Only needed when adding/removing system packages or COPRs.
 bluebuild build recipes/recipe.yml
 ```
 
-CI in [.github/workflows/build.yml](.github/workflows/build.yml) builds on every push to `main` (paths-ignore: `**.md`), nightly at 10:05 UTC, and on `workflow_dispatch`. The `SIGNING_SECRET` repo secret holds the cosign private key matching [cosign.pub](cosign.pub).
+CI in [.github/workflows/build.yml](.github/workflows/build.yml) builds on every push to `main` (paths-ignore: `**.md`, `dotfiles/**`, `wallpapers/**` — none are baked into the image), nightly at 10:05 UTC, and on `workflow_dispatch`. The `SIGNING_SECRET` repo secret holds the cosign private key matching [cosign.pub](cosign.pub).
 
 The recipe pulls Hyprland packages from two COPRs (`nett00n/hyprland` for the core, `solopasha/hyprland` for the live-wallpaper extras + nwg-look) and LACT from `ilyaz/LACT`. `lactd.service` is the only systemd unit enabled by the recipe.
 
@@ -48,7 +48,7 @@ After publishing a new image, users pick it up via `rpm-ostree upgrade` (or it l
 
 **Wallpaper system ([dotfiles/hypr/cycle-wallpaper.lua](dotfiles/hypr/cycle-wallpaper.lua), [dotfiles/hypr/pick-wallpaper.lua](dotfiles/hypr/pick-wallpaper.lua)).** Two backends behind one interface: `swww` for stills (incl. animated GIFs in non-span mode), `mpvpaper` for videos. The script handles per-monitor state (`~/.local/state/hypr/wallpaper-index-<MON>`), pre-fades to an extracted first frame before mpvpaper takes the surface (eliminates black-flash on video swaps), and synchronizes multi-monitor video launches via mpv's IPC socket so spanned videos stay frame-aligned. Wallpapers live in `<repo>/wallpapers/` (searched recursively). Animated GIFs route through `mpvpaper` rather than `swww` when spanning, because swww's per-monitor animation workers run on independent clocks and drift.
 
-**Workspace assignment ([dotfiles/hypr/workspace-watcher.lua](dotfiles/hypr/workspace-watcher.lua)).** Hyprland 0.54's `windowrule` block silently *accepts but ignores* `workspace=`/`assign=`/`move=` — so this script subscribes to Hyprland's event socket (`.socket2.sock`) and dispatches `movetoworkspacesilent` itself. The `RULES` associative array is the entire rule table; class names are matched as Lua patterns (current rules are regex-equivalent). Edit there, then reload with `SUPER+SHIFT+R`.
+**Workspace assignment ([dotfiles/hypr/workspace-watcher.lua](dotfiles/hypr/workspace-watcher.lua)).** Hyprland's `windowrule` block silently *accepts but ignores* `workspace=`/`assign=`/`move=` (observed on 0.54; the workaround is still in use on the 0.55.x this system now runs, and has not been retested) — so this script subscribes to Hyprland's event socket (`.socket2.sock`) and dispatches `movetoworkspacesilent` itself. The `RULES` table is an ordered list of `{pattern, workspace}` pairs (order matters — first match wins); class names are matched as Lua patterns (current rules are regex-equivalent). Edit there, then reload with `SUPER+SHIFT+R`.
 
 **Startup apps ([dotfiles/hypr/startup-apps.{conf,sh}](dotfiles/hypr/startup-apps.conf), [toggle-startup-apps.lua](dotfiles/hypr/toggle-startup-apps.lua)).** `startup-apps.conf` is a pipe-delimited `state|name|command` table read on Hyprland start. `SUPER+SHIFT+A` opens a rofi menu that lets the user remove an entry (kills the process too) or pick a `.desktop` from installed apps to add as a new entry. The `name` field doubles as the `pgrep -if` pattern, so it must appear in the running process's argv (e.g. `spotify` matches `com.spotify.Client`).
 

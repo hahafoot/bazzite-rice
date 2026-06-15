@@ -1,2 +1,9 @@
 #!/usr/bin/env bash
+# spotify_player TUI (Premium required). Installed via linuxbrew, which isn't
+# always on PATH for non-login invocations -- add it, then fail clearly.
+PATH="$PATH:/home/linuxbrew/.linuxbrew/bin"
+command -v spotify_player >/dev/null 2>&1 || {
+    echo "music: spotify_player not found (brew install spotify_player)" >&2
+    exit 127
+}
 exec spotify_player "$@"

@@ -17,6 +17,8 @@ modules:
       packages:
         - hyprland
         - xdg-desktop-portal-hyprland
+        # GUI helpers for Hyprland (hyprland-guiutils: hyprland-dialog etc.)
+        - hyprland-guiutils
         # Wallpaper daemon: swww (better-behaved than hyprpaper v0.8.4 and
         # supports per-monitor unload, which mpvpaper relies on).
         - swww
@@ -26,7 +28,9 @@ modules:
         - hyprshot
         - hyprcursor
         - waybar
-        - rofi-wayland
+        # rofi 2.x is wayland-native; "rofi-wayland" is a retired name that
+        # only resolves through a compat Provides.
+        - rofi
         - SwayNotificationCenter
         - wlogout
         - grim
@@ -38,7 +42,6 @@ modules:
         # dotfiles/waybar/scripts/*.lua). Declared explicitly: nothing else
         # in the image guarantees it.
         - luajit
-        - vulkan-validation-layers
         - jetbrains-mono-fonts
         # --- GUI helpers (auth dialogs, audio/network/bluetooth tray, Qt theming) ---
         - hyprpolkitagent
@@ -48,6 +51,8 @@ modules:
         - qt6ct
         - kvantum
         - nwg-look
+        # Icon theme referenced by rofi (icon-theme: "Papirus-Dark").
+        - papirus-icon-theme
         # --- Live wallpaper stack ---
         # mpvpaper plays videos as wallpapers; waypaper is a GUI picker that
         # drives mpvpaper/hyprpaper/swww. mpv is the video backend mpvpaper needs.

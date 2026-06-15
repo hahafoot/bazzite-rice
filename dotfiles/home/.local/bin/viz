@@ -1,2 +1,9 @@
 #!/usr/bin/env bash
+# cava audio visualizer. Installed via linuxbrew, which isn't always on PATH
+# for non-login invocations -- add it, then fail clearly.
+PATH="$PATH:/home/linuxbrew/.linuxbrew/bin"
+command -v cava >/dev/null 2>&1 || {
+    echo "viz: cava not found (brew install cava)" >&2
+    exit 127
+}
 exec cava "$@"

@@ -73,7 +73,9 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(git)
 
-source $ZSH/oh-my-zsh.sh
+# Guard: oh-my-zsh is a manual prereq (see README), not provisioned by the
+# image or install.sh. Without this, every shell errors if it's not installed.
+[[ -f $ZSH/oh-my-zsh.sh ]] && source $ZSH/oh-my-zsh.sh
 
 # User configuration
 
@@ -107,6 +109,8 @@ source $ZSH/oh-my-zsh.sh
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
-# Remove Bazzite's fastfetch alias so ~/.config/fastfetch/config.jsonc is used
+# Remove Bazzite's fastfetch alias so ~/.config/fastfetch/config.jsonc is used.
+# Only run the banner when stdin is a real terminal, so `zsh -ic '...'` from
+# scripts/automation doesn't get fastfetch output prepended.
 unalias fastfetch 2>/dev/null
-fastfetch
+[[ -t 0 ]] && fastfetch

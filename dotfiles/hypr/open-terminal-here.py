@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 """SUPER+SHIFT+ENTER: open a kitty terminal in the focused file-manager's folder.
 
 If the currently focused window is a Nautilus (Files) window, open kitty in the

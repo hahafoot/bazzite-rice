@@ -91,9 +91,14 @@ for _, tok in ipairs(tokens) do
 end
 graph = table.concat(graph)
 
-local class = "gpu"
-if usage >= 80 or temp >= 80 then class = "gpu warning" end
-if usage >= 95 or temp >= 90 then class = "gpu critical" end
+-- Array, not a string: waybar applies each element as its own CSS class, so
+-- "gpu warning" as one string would never match #custom-gpu.warning.
+local class = { "gpu" }
+if usage >= 95 or temp >= 90 then
+    class[#class + 1] = "critical"
+elseif usage >= 80 or temp >= 80 then
+    class[#class + 1] = "warning"
+end
 
 print(json.encode({
     text = string.format("󰢮 %s  %d%% %d°C", graph, usage, temp),

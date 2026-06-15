@@ -4,9 +4,19 @@ on:
     - cron: "05 10 * * *"
   push:
     branches: [main]
+    # The image only ships binaries; dotfiles/ and wallpapers/ are applied at
+    # runtime by install.sh and are never baked in, so changing them shouldn't
+    # trigger a full image rebuild + publish.
     paths-ignore:
       - "**.md"
+      - "dotfiles/**"
+      - "wallpapers/**"
   workflow_dispatch:
+
+# Don't let overlapping runs race each other pushing :latest.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
+  cancel-in-progress: true
 
 jobs:
   build:

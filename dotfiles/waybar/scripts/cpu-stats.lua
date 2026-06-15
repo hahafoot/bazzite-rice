@@ -84,9 +84,15 @@ end
 graph = table.concat(graph)
 
 -- --- Class for CSS coloring ---
-local class = "cpu"
-if usage >= 80 or temp >= 80 then class = "cpu warning" end
-if usage >= 95 or temp >= 90 then class = "cpu critical" end
+-- Must be a JSON array: waybar applies each element as a separate CSS class.
+-- A single "cpu warning" string would be treated as one class literally named
+-- "cpu warning", so #custom-cpu.warning would never match.
+local class = { "cpu" }
+if usage >= 95 or temp >= 90 then
+    class[#class + 1] = "critical"
+elseif usage >= 80 or temp >= 80 then
+    class[#class + 1] = "warning"
+end
 
 print(json.encode({
     text = string.format(" %s  %d%% %d°C", graph, usage, temp),

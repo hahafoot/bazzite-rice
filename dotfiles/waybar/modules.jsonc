@@ -155,12 +155,6 @@
         }
     },
 
-    "hyprland/window": {
-        "format": "{}",
-        "max-length": 60,
-        "separate-outputs": true
-    },
-
     "clock": {
         "format":          "{:%a %d %b  %H:%M}",
         "tooltip-format":  "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
@@ -175,11 +169,9 @@
         "on-click":        "playerctl play-pause",
         "on-click-right":  "kitty --class=playing-tui -- playing",
         "on-scroll-up":    "playerctl next",
-        "on-scroll-down":  "playerctl previous"
+        "on-scroll-down":  "playerctl previous",
+        "restart-interval": 3
     },
-
-    "cpu":    { "format": "  {usage}%" },
-    "memory": { "format": "  {percentage}%" },
 
     "custom/cpu": {
         "exec":          "~/.config/waybar/scripts/cpu-stats.lua",
@@ -196,20 +188,20 @@
     },
 
 "network": {
-        "format-wifi":         "  {essid}",
-        "format-ethernet":     "  ↓{bandwidthDownBits} ↑{bandwidthUpBits}",
-        "format-disconnected": "  offline",
+        "format-wifi":         "󰇩  {essid}",
+        "format-ethernet":     "󰈀  ↓{bandwidthDownBits} ↑{bandwidthUpBits}",
+        "format-disconnected": "󰇪  offline",
         "tooltip-format-wifi":     "{essid} ({signalStrength}%)\n{ifname}: {ipaddr}/{cidr}\nGateway: {gwaddr}\n↓ {bandwidthDownBits}  ↑ {bandwidthUpBits}",
         "tooltip-format-ethernet": "{ifname}: {ipaddr}/{cidr}\nGateway: {gwaddr}\n↓ {bandwidthDownBits}  ↑ {bandwidthUpBits}",
         "tooltip-format-disconnected": "offline",
         "on-click":            "nm-connection-editor",
-        "on-click-right":      "gnome-control-center network"
+        "on-click-right":      "env XDG_CURRENT_DESKTOP=GNOME gnome-control-center network"
     },
 
     "pulseaudio": {
         "format":            "{icon}  {volume}%",
-        "format-muted":      "  muted",
-        "format-icons":      { "default": ["", "", ""] },
+        "format-muted":      "󰖁  muted",
+        "format-icons":      { "default": ["󰕿", "󰖀", "󰕾"] },
         "tooltip-format":    "{desc}\n{volume}% via {format_source}",
         "scroll-step":       2,
         "on-click":          "pavucontrol",

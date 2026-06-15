@@ -36,6 +36,12 @@ local REPO_ROOT = here:match("(.*)/[^/]+/[^/]+$") or "/"
 local WALL_DIR = os.getenv("WALLPAPER_DIR") or (REPO_ROOT .. "/wallpapers")
 local STATE_DIR = hypr.state_dir()
 
+-- Records the path of the currently-spanned wallpaper (if any) so `init` after
+-- a Hyprland restart restores the span instead of degrading it to independent
+-- per-monitor crops. Cleared whenever a per-monitor wallpaper is applied.
+local SPAN_STATE = STATE_DIR .. "/wallpaper-span"
+local function clear_span() posix.unlink(SPAN_STATE) end
+
 local IMAGE_EXTS = { png = true, jpg = true, jpeg = true, webp = true, jxl = true }
 local VIDEO_EXTS = { mp4 = true, webm = true, mkv = true, mov = true }
 local ALL_EXTS = {}
@@ -43,12 +49,14 @@ for e in pairs(IMAGE_EXTS) do ALL_EXTS[e] = true end
 for e in pairs(VIDEO_EXTS) do ALL_EXTS[e] = true end
 ALL_EXTS.gif = true
 
--- GIFs route through mpvpaper too: when spanning, swww's per-monitor
--- animation workers run on independent clocks and drift out of sync,
--- while parallel mpv processes started together stay frame-aligned.
-local function is_video(path)
+-- Real videos always go to mpvpaper. GIFs go to swww (it animates them fine
+-- on a single output) EXCEPT when spanning: swww's per-monitor animation
+-- workers run on independent clocks and drift out of sync, while parallel mpv
+-- processes started together stay frame-aligned -- so a spanned GIF routes
+-- through mpvpaper instead. Callers pass spanning=true only on the span path.
+local function is_video(path, spanning)
     local e = fs.ext(path)
-    return VIDEO_EXTS[e] or e == "gif"
+    return VIDEO_EXTS[e] or (spanning and e == "gif") or false
 end
 
 local walls = fs.walk_files(WALL_DIR, ALL_EXTS, { __MACOSX = true }, "._")
@@ -116,7 +124,12 @@ end
 local function stop_mpvpaper_for(mon)
     local pidfile = STATE_DIR .. "/mpvpaper-" .. mon .. ".pid"
     local pid = tonumber((posix.read_file(pidfile) or ""):match("%d+"))
-    if pid then proc.kill(pid) end
+    if pid then
+        -- Only kill if the PID is still mpvpaper: PIDs get recycled, and the
+        -- pidfile can outlive the process across reboots/crashes.
+        local comm = (posix.read_file("/proc/" .. pid .. "/comm") or ""):gsub("%s+$", "")
+        if comm == "mpvpaper" then proc.kill(pid) end
+    end
     posix.unlink(pidfile)
     proc.pkill_f("mpvpaper.* " .. mon .. " ")
 end
@@ -132,6 +145,7 @@ local function swww_img(mon, wall, extra)
 end
 
 local function apply_image(mon, wall)
+    clear_span()
     stop_mpvpaper_for(mon)
     ensure_swww_running()
     -- Subtle fade between wallpapers. Tweak to taste.
@@ -159,6 +173,14 @@ local function mpv_unpause(fd)
     end
 end
 
+-- Best-effort prune of a regenerable cache dir: drop files not accessed in
+-- 30+ days so the spanned-crop and first-frame caches don't grow without
+-- bound (they had reached hundreds of MB). Anything pruned is rebuilt on
+-- demand. atime (under the default relatime) keeps daily-used crops alive.
+local function prune_cache(dir)
+    proc.call({ "find", dir, "-type", "f", "-atime", "+30", "-delete" })
+end
+
 -- Extract (and cache) the first frame of a video file. Returns the cache
 -- path on success, nil on failure. Used to play a swww transition before
 -- mpvpaper claims the surface so videos don't pop in cold.
@@ -171,6 +193,7 @@ local function extract_video_frame(wall)
     if not file_nonempty(frame_file) then
         proc.call({ "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
                     "-i", wall, "-frames:v", "1", frame_file })
+        prune_cache(fdir)
     end
     if file_nonempty(frame_file) then return frame_file end
     return nil
@@ -198,6 +221,7 @@ local function apply_video(mon, wall)
                     { urgency = "normal" })
         return
     end
+    clear_span()
     ensure_swww_running()
 
     -- 1. Start the swww fade to the still first frame. Fit-with-black-fill so
@@ -386,6 +410,7 @@ local function apply_spanned_image(wall)
         swww_img(r.name, crop_file)
         save_index(r.name, wall)
     end
+    prune_cache(cache_dir)
     return true
 end
 
@@ -449,7 +474,10 @@ local function apply_spanned_video(wall)
     for _, r in ipairs(rows) do
         local x, y, w, h = source_crop(r, img.w, src_w, src_h)
         local sock = mpv_ipc_sock(r.name)
-        -- apply_spanned_image already stopped mpvpaper for this monitor.
+        -- Stop any prior mpvpaper before spawning the new one. apply_spanned_image
+        -- already does this, but it is skipped when frame extraction fails above,
+        -- so do it unconditionally here (idempotent) to avoid stacking instances.
+        stop_mpvpaper_for(r.name)
         spawn_mpvpaper(r.name, wall, sock,
                        "vf=crop=" .. w .. ":" .. h .. ":" .. x .. ":" .. y)
         socks[#socks + 1] = sock
@@ -484,12 +512,14 @@ if action == "span" then
         os.exit(2)
     end
     local ok
-    if is_video(span_path) then
+    if is_video(span_path, true) then
         ok = apply_spanned_video(span_path)
     else
         ok = apply_spanned_image(span_path)
     end
     if not ok then os.exit(1) end
+    -- Remember the span so `init` after a Hyprland restart can restore it.
+    posix.write_file(SPAN_STATE, span_path .. "\n")
     hypr.notify("Wallpaper", fs.basename(span_path) .. " spanned across monitors",
                 { timeout_ms = 2000 })
     os.exit(0)
@@ -514,6 +544,26 @@ end
 if action ~= "next" and action ~= "prev" and action ~= "init" and action ~= "current" then
     io.stderr:write("unknown action: " .. action .. "\n")
     os.exit(2)
+end
+
+-- init after a Hyprland restart: if the last wallpaper was spanned, restore the
+-- span instead of degrading to independent per-monitor crops. A failed restore
+-- (e.g. the file was deleted) falls through to the normal per-monitor path.
+if action == "init" then
+    local sp = (posix.read_file(SPAN_STATE) or ""):match("[^\n]+")
+    if sp and posix.exists(sp) then
+        local ok
+        if is_video(sp, true) then
+            ok = apply_spanned_video(sp)
+        else
+            ok = apply_spanned_image(sp)
+        end
+        if ok then
+            hypr.notify("Wallpaper", fs.basename(sp) .. " spanned across monitors",
+                        { timeout_ms = 2000 })
+            os.exit(0)
+        end
+    end
 end
 
 local mon_arg = arg[2]

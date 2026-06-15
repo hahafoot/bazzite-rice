@@ -1,5 +1,7 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 # GTK4 monitor arranger for Hyprland.
+# Pinned to the system interpreter: `env python3` resolves to linuxbrew's
+# python3 in interactive shells, which has no `gi` (PyGObject) module.
 #
 # Reads the current monitor state from `hyprctl monitors -j`, lets you drag
 # monitors around a canvas, change mode/scale/rotation/enabled, then live-applies

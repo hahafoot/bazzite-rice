@@ -17,6 +17,7 @@ import sys
 import termios
 import time
 import tty
+import unicodedata
 from pathlib import Path
 
 PINK    = "\x1b[38;2;255;167;184m"
@@ -57,15 +58,20 @@ def playerctl(*args: str) -> str:
 
 
 def get_state() -> dict:
-    fmt = (
-        "{{playerName}}|{{status}}|{{xesam:title}}|{{xesam:artist}}|"
-        "{{xesam:album}}|{{position}}|{{mpris:length}}"
-    )
+    # Join/split on the ASCII unit separator (0x1f), not '|': titles, artists
+    # and album names routinely contain '|' (e.g. "Artist | Topic" channels),
+    # which would otherwise shift every later field. playerctl passes the
+    # literal 0x1f byte through its template engine unchanged.
+    SEP = "\x1f"
+    fmt = SEP.join((
+        "{{playerName}}", "{{status}}", "{{xesam:title}}", "{{xesam:artist}}",
+        "{{xesam:album}}", "{{position}}", "{{mpris:length}}",
+    ))
     raw = playerctl("metadata", "--format", fmt)
     if not raw:
         return {"player": "", "status": "", "title": "", "artist": "",
                 "album": "", "pos": 0, "length": 0}
-    parts = (raw.split("|") + [""] * 7)[:7]
+    parts = (raw.split(SEP) + [""] * 7)[:7]
 
     def _int(s: str) -> int:
         try:
@@ -89,22 +95,46 @@ def fmt_time(us: int) -> str:
     return f"{s // 60}:{s % 60:02d}"
 
 
+def vwidth(s: str) -> int:
+    """Visible terminal column width: CJK/fullwidth glyphs occupy 2 columns."""
+    return sum(2 if unicodedata.east_asian_width(c) in ("W", "F") else 1 for c in s)
+
+
 def truncate(s: str, n: int) -> str:
-    return s if len(s) <= n else s[: n - 1] + "…"
+    if vwidth(s) <= n:
+        return s
+    out, w = [], 0
+    for ch in s:
+        cw = 2 if unicodedata.east_asian_width(ch) in ("W", "F") else 1
+        if w + cw > n - 1:        # reserve 1 column for the ellipsis
+            break
+        out.append(ch)
+        w += cw
+    return "".join(out) + "…"
 
 
 def marquee(s: str, n: int, frame: int, frames_per_step: int = 2,
             sep: str = "   •   ") -> str:
-    """Return an n-wide slice of `s` that scrolls left over time.
+    """Return an n-column slice of `s` that scrolls left over time.
 
     `frame` advances once per render tick; the visible window steps one
     character every `frames_per_step` ticks. Falls back to `s` when it fits.
+    Widths are measured in terminal columns so CJK titles stay aligned.
     """
-    if len(s) <= n:
+    if vwidth(s) <= n:
         return s
     full = s + sep
     step = (frame // max(1, frames_per_step)) % len(full)
-    return (full + full)[step : step + n]
+    out, w = [], 0
+    for ch in (full + full)[step:]:
+        cw = 2 if unicodedata.east_asian_width(ch) in ("W", "F") else 1
+        if w + cw > n:
+            break
+        out.append(ch)
+        w += cw
+    if w < n:                     # pad a column a wide char straddled
+        out.append(" " * (n - w))
+    return "".join(out)
 
 
 def progress_bar(pos: int, length: int, width: int) -> str:
@@ -237,16 +267,16 @@ def main() -> None:
                 (blank,   card_w),
                 (card_line(status_str, status_vis),  card_w),
                 (blank,   card_w),
-                (card_line(title_str, len(title)),   card_w),
-                (card_line(artist_str, len(artist)), card_w),
+                (card_line(title_str, vwidth(title)),   card_w),
+                (card_line(artist_str, vwidth(artist)), card_w),
             ]
             if album:
-                lines.append((card_line(album_str, len(album)), card_w))
+                lines.append((card_line(album_str, vwidth(album)), card_w))
             lines += [
                 (blank, card_w),
                 (card_line(time_line_content, time_line_vis), card_w),
                 (blank, card_w),
-                (card_line(player_str, len("via ") + len(player)), card_w),
+                (card_line(player_str, 4 + vwidth(player)), card_w),
                 (blank, card_w),
                 (bottom_b, card_w),
             ]

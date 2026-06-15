@@ -6,3 +6,7 @@ wallpapers/c8c78924-51dd-4533-8c63-4a30cf9fd0b3_TABLET_LANDSCAPE_LARGE_16_9.webp
 wallpapers/wall.png
 wallpapers/image0.gif
 wallpapers/COPYRIGHTED/
+
+# waypaper rewrites this through the symlink on every GUI wallpaper change and
+# it holds machine-local absolute paths -- keep it out of the repo.
+dotfiles/waypaper/config.ini

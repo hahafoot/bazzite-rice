@@ -37,7 +37,8 @@ def main() -> None:
     old_attrs = termios.tcgetattr(fd) if fd is not None else None
 
     def restore() -> None:
-        write("\x1b[0m\x1b[?25h\x1b[2J\x1b[H")
+        # Leave the alternate screen, restoring the user's terminal contents.
+        write("\x1b[0m\x1b[?25h\x1b[2J\x1b[H\x1b[?1049l")
         sys.stdout.flush()
         if fd is not None and old_attrs is not None:
             termios.tcsetattr(fd, termios.TCSADRAIN, old_attrs)
@@ -51,7 +52,8 @@ def main() -> None:
 
     if fd is not None:
         tty.setcbreak(fd)
-    write("\x1b[?25l\x1b[2J")
+    # Enter the alternate screen buffer so the animation doesn't clobber scrollback.
+    write("\x1b[?1049h\x1b[?25l\x1b[2J")
     sys.stdout.flush()
 
     t0 = time.time()

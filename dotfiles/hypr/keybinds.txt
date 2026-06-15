@@ -1,6 +1,6 @@
                               HYPRLAND KEYBINDS
                               =================
-                      (press q or Esc to close this window)
+                          (press q to close this window)
 
   Mod = SUPER (Windows key)
 
@@ -12,7 +12,7 @@
     SUPER + SPACE               rofi app launcher
     SUPER + E                   nautilus (file manager)
     SUPER + G                   Steam
-    SUPER + SHIFT + A           toggle startup apps on/off (rofi menu)
+    SUPER + SHIFT + A           add/remove startup apps (rofi menu; removing kills the process)
     SUPER + L                   hyprlock (lock screen)
     SUPER + ESCAPE              wlogout (power menu)
     SUPER + SHIFT + M           exit Hyprland (panic bind)
@@ -42,7 +42,7 @@
   ----------
     SUPER + SHIFT + P           waypaper (GUI picker)
     SUPER + W                   terminal wallpaper picker (kitty + fzf), then:
-                                  Enter             apply to all monitors
+                                  Enter             span across all monitors
                                   Alt + 1           apply to DP-1
                                   Alt + 2           apply to DP-2
                                   Esc               cancel
@@ -55,7 +55,7 @@
     Print                       full monitor → ~/Pictures
     SUPER + Print               active window
     SUPER + SHIFT + Print       region (drag to select)
-    SUPER + SHIFT + S           region   (alias of SHIFT+Print)
+    SUPER + SHIFT + S           region   (alias of SUPER+SHIFT+Print)
 
 
   CLIPBOARD
@@ -68,7 +68,7 @@
     Volume Up / Down            change default sink volume by 5%
     Mute                        toggle default sink mute
     Mic Mute                    toggle default mic mute
-    Play / Pause / Next / Prev  playerctl (whichever player is active)
+    Play/Pause/Next/Prev/Stop   playerctl (whichever player is active)
 
 
   BRIGHTNESS  (external monitors via ddcutil / DDC-CI)
@@ -83,6 +83,7 @@
     SUPER + SHIFT + B           restart waybar (status bar)
     SUPER + SHIFT + R           reload workspace-watcher.lua (after editing rules)
     SUPER + CTRL + SHIFT + R    re-apply hyprland.conf (if monitors/binds drop)
+    SUPER + SHIFT + D           monitor arranger (GUI: drag/resize/rotate, Save writes monitors.conf)
 
 
   WAYBAR CLICKS  (right cluster)

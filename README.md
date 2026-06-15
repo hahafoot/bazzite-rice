@@ -9,10 +9,10 @@ Image: `ghcr.io/hahafoot/bazzite-rice:latest`
 - **Base:** `ghcr.io/ublue-os/bazzite-gnome:stable`
 - **Compositor stack** (from the `nett00n/hyprland` and `solopasha/hyprland` COPRs):
   Hyprland, xdg-desktop-portal-hyprland, hyprlock, hypridle, hyprpicker, hyprshot, hyprcursor, hyprpolkitagent
-- **Desktop bits:** Waybar, rofi-wayland, SwayNotificationCenter, wlogout, kitty, grim, slurp, cliphist
+- **Desktop bits:** Waybar, rofi (2.x, wayland-native), SwayNotificationCenter, wlogout, kitty, grim, slurp, cliphist
 - **Live-wallpaper stack:** swww, mpvpaper, waypaper, mpv
-- **GUI helpers:** pavucontrol, network-manager-applet, blueman, qt6ct, kvantum, nwg-look
-- **Extras:** zsh, vulkan-validation-layers, jetbrains-mono-fonts
+- **GUI helpers:** pavucontrol, network-manager-applet, blueman, qt6ct, kvantum, nwg-look, papirus-icon-theme
+- **Extras:** zsh, luajit, jetbrains-mono-fonts
 
 Full package list lives in [recipes/recipe.yml](recipes/recipe.yml).
 

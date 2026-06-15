@@ -74,7 +74,7 @@ modules:
   - type: dnf
     repos:
       copr:
-        - solopasha/hyprland      # or ashbuk/Hyprland-Fedora, nett00n/hyprland-copr
+        - solopasha/hyprland      # or ashbuk/Hyprland-Fedora, nett00n/hyprland
     install:
       packages:
         - hyprland
@@ -109,7 +109,7 @@ Hyprland isn't always current in Fedora's own repos, so you'll use a COPR. The l
 
 - **`solopasha/hyprland`** — historically the "officially recommended" one with the widest package set (hyprland, hyprpaper, hyprlock, hypridle, hyprpicker, hyprshot, waybar variants, AGS, hyprpanel, etc.). Has had stale stretches.
 - **`ashbuk/Hyprland-Fedora`** — clean, minimal, Fedora-spec-compliant, tracks upstream closely (was at 0.53.0 around New Year 2026). Core compositor + portal only.
-- **`nett00n/hyprland-copr`** — reproducible builds, created specifically because of solopasha's dormancy.
+- **`nett00n/hyprland`** (source: github.com/nett00n/hyprland-copr) — reproducible builds, created specifically because of solopasha's dormancy.
 
 ### C.2 — Add the repo and layer the packages
 

@@ -92,12 +92,15 @@ end
 local parse_value
 
 local function parse_array(str, pos)
-    local arr, i = {}, skip_ws(str, pos + 1)
+    local arr, n, i = {}, 0, skip_ws(str, pos + 1)
     if str:sub(i, i) == "]" then return arr, i + 1 end
     while true do
         local v
         v, i = parse_value(str, i)
-        arr[#arr + 1] = v
+        -- Use an explicit counter so a JSON null (decoded to nil) keeps the
+        -- positions of later elements instead of collapsing the array via #arr.
+        n = n + 1
+        arr[n] = v
         i = skip_ws(str, i)
         local c = str:sub(i, i)
         if c == "]" then return arr, i + 1 end
